@@ -1,20 +1,3 @@
-# Including Dot-source helper 
-$includeMyStuff = $(Join-Path $(Split-Path ($MyInvocation.MyCommand.Path)) "Helper\Build-Helper-Functions.ps1")
-Write-Host "Include: $($includeMyStuff)"
-. $includeMyStuff
-
-# Accessing the second argument (comma-separated strings)
-#$Target_Ini = ($args[1] -split ',')[0].Trim()
-#$OAM_Support_ToMatch = ($args[1] -split ',')[1].Trim()
-if (($Target_Ini = ($args[1] -split ',')[0].Trim()) -and ($OAM_Support_ToMatch = ($args[1] -split ',')[1].Trim())) {
-  Write-Host "Adding OpenKNXHardware.ini sections to: $($Target_Ini) which support: '$($OAM_Support_ToMatch)'" -ForegroundColor Green
-  $OpenKNX_Device_Ini = "lib\OGM-Common\include\OpenKNXHardware.ini"
-  Copy-Sections -sourceIni $OpenKNX_Device_Ini -targetIni $Target_Ini -parameter $OAM_Support_ToMatch
-}
-
-Start-Sleep -Seconds 30
-
-
 # This script is responsible for all common tasks before a release build is executed
 
 # get all definitions for this project
