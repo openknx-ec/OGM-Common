@@ -45,6 +45,7 @@ namespace OpenKNX
         void showHelp();
         void sleep();
         uint32_t sleepTime();
+        void showWatchdogResets(bool diagnoseKo = false);
 #ifdef ARDUINO_ARCH_RP2040
         void resetToBootloader();
         void showFilesystem();
@@ -58,7 +59,6 @@ namespace OpenKNX
 
         void printHelpLine(const char* command, const char* message);
         bool processCommand(std::string cmd, bool diagnoseKo = false);
-        void showWatchdogRestart(bool diagnoseKo = false);
 #ifdef BASE_KoDiagnose
         void processDiagnoseKo(GroupObject& ko);
         void writeDiagenoseKo(const char* message, ...);
