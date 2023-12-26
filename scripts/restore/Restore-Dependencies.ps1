@@ -130,14 +130,14 @@ function CheckForPrivileges {
         exit 1
       } else { Write-Host -ForegroundColor Green "- The script is running with Developer Mode." ([Char]0x221A) }
     }
-    if($CHeckForSymbolicLinkPermissions) {
+    if(-not $UseMklinkToCreateSymLinks -and $CHeckForSymbolicLinkPermissions) {
       if($Verbose) { Write-Host -ForegroundColor Yellow "- Checking if we have permissions to create symbolic links" }
       if( -not (Test-SymbolicLinkPermission) ) {   
         Write-Host -ForegroundColor Red "ERROR: Restore-Dependencies requires permissions to create symbolic links to run!"
         Write-Host -ForegroundColor Red "- Please run the script again with Administrator privileges."
         exit 1
       } else { Write-Host -ForegroundColor Green "- The script has permissions to create symbolic links." ([Char]0x221A) }
-    }
+    } else { Write-Host -ForegroundColor Green "- We will use mklink to create symbolic links." ([Char]0x221A) }
   }
 }
 
