@@ -213,7 +213,7 @@
     #endif
 
 // OpenKNXiao (Base) V1
-    #ifdef  OKNXHW_OPENKNXIAO_KNEOPiX_V1
+    #ifdef  OKNXHW_OPENKNXIAO_KNEOPIX_V1
         #define OKNXHW_OPENKNXIAO_RP2040_BASE_V1
             #define INFO1_LED_PIN 16  // Build-In LED GREEN
             #define INFO1_LED_PIN_ACTIVE_ON HIGH
@@ -227,15 +227,15 @@
             #define INFO2_LED_PIN 25  // Build-In LED BLUE
             #define INFO2_LED_PIN_ACTIVE_ON HIGH
     #endif
-    #ifdef  OKNXHW_OPENKNXIAO_RP_KNEOPiX_V1
-        #define OKNXHW_OPENKNXIAO_RP2040_BASE_V1
+    #ifdef  OKNXHW_OPENKNXIAO_KNEOPIX_SAMD_V1
+        #define OKNXHW_OPENKNXIAO_SAMD21_BASE_V1
             #define INFO1_LED_PIN 16  // Build-In LED GREEN
             #define INFO1_LED_PIN_ACTIVE_ON HIGH
             #define INFO2_LED_PIN 25  // Build-In LED BLUE
             #define INFO2_LED_PIN_ACTIVE_ON HIGH
     #endif
     #ifdef  OKNXHW_OPENKNXIAO_MINI_SAMD_V1
-        #define OKNXHW_OPENKNXIAO_SAMD_BASE_V1
+        #define OKNXHW_OPENKNXIAO_SAMD21_BASE_V1
             #define INFO1_LED_PIN 11  // Build-In LED BLUE 1
             #define INFO1_LED_PIN_ACTIVE_ON HIGH
             #define INFO2_LED_PIN 12  // Build-In LED BLUE 2
@@ -252,7 +252,7 @@
         #define KNX_UART_TX_PIN 7
     #endif
 
-    #ifdef OKNXHW_OPENKNXIAO_SAMD_BASE_V1
+    #ifdef OKNXHW_OPENKNXIAO_SAMD21_BASE_V1
         #define PROG_LED_PIN 13
         #define PROG_LED_PIN_ACTIVE_ON HIGH
         #define PROG_BUTTON_PIN 0
