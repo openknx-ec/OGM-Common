@@ -166,7 +166,7 @@ function CheckForPrivileges {
       if($Verbose) { Write-Host -ForegroundColor Yellow "- Checking if we have permissions to create symbolic links" }
       if( -not (Test-SymbolicLinkPermission) ) {
         if($Auto_Use_mklink_To_Create_SymLinks) {
-          $script:$Foce_Use_mklink_To_Create_SymLinks = $true
+          $script:Foce_Use_mklink_To_Create_SymLinks = $true
           Write-Host -ForegroundColor Yellow "- We have no permissions to create symbolic links with 'New-Item'. We will try to use mklink to create symbolic links."
         } else {
           Write-Host -ForegroundColor Red "ERROR: Restore-Dependencies requires permissions to create symbolic links to run!"
