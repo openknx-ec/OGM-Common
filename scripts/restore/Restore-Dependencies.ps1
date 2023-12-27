@@ -45,7 +45,7 @@ param(
 
   # Check for privileges (Windows only)
   [switch]$CheckForDeveloperMode= $true,  # Default is $true
-  [switch]$CHeckForSymbolicLinkPermissions= $true, # Default is $true
+  [switch]$CheckForSymbolicLinkPermissions= $true, # Default is $true
   [switch]$CheckForAdminOnly= $false # Default is $false
 )
 
@@ -162,11 +162,11 @@ function CheckForPrivileges {
         exit 1
       } else { Write-Host -ForegroundColor Green "- The script is running with Developer Mode." ([Char]0x221A) }
     }
-    if(-not $Foce_Use_mklink_To_Create_SymLinks -and $CHeckForSymbolicLinkPermissions) {
+    if(-not $Foce_Use_mklink_To_Create_SymLinks -and $CheckForSymbolicLinkPermissions) {
       if($Verbose) { Write-Host -ForegroundColor Yellow "- Checking if we have permissions to create symbolic links" }
       if( -not (Test-SymbolicLinkPermission) ) {
         if($Auto_Use_mklink_To_Create_SymLinks) {
-          $Foce_Use_mklink_To_Create_SymLinks = $true
+          $script:$Foce_Use_mklink_To_Create_SymLinks = $true
           Write-Host -ForegroundColor Yellow "- We have no permissions to create symbolic links with 'New-Item'. We will try to use mklink to create symbolic links."
         } else {
           Write-Host -ForegroundColor Red "ERROR: Restore-Dependencies requires permissions to create symbolic links to run!"
