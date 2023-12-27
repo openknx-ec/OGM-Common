@@ -50,7 +50,10 @@ param(
 )
 
 # Global Variables
-$UseMklinkToCreateSymLinks = $false
+# If the user has no permissions to create symbolic links with 'New-Item', the script will try to use mklink to create symbolic links.  
+$Auto_Use_mklink_To_Create_SymLinks = $true # Default is $true
+# Ignore the permissions to create symbolic links with 'New-Item' and use mklink to create symbolic links.
+$Foce_Use_mklink_To_Create_SymLinks = $false # Default is $false
 
 # Set the Write-Host message behavior
 [switch]$Verbose= $false # Default is $false
@@ -72,22 +75,51 @@ function Test-DeveloperMode {
 }
 
 function Test-SymbolicLinkPermission {
+  # Clear the error variable
+  $Error.Clear()
+  $bRet = $true
   # Create a test symbolic link and target
   $testLinkPath = Join-Path ([System.IO.Path]::GetTempPath()) "test_symlink"
   $testTargetPath = Join-Path ([System.IO.Path]::GetTempPath()) "test_target"
   # Create the test target file
-  New-Item -ItemType File -Path $testTargetPath -Force | Out-Null
-  try {
-    New-Item -ItemType SymbolicLink -Path $testLinkPath -Target $testTargetPath -Force | Out-Null
-    Write-Host -ForegroundColor Green "- User $($env:USERNAME) has permissions to create symbolic links."([Char]0x221A)
-    return $true
-  } catch {
-    Write-Host -ForegroundColor Red "- User $($env:USERNAME) does not have permissions to create symbolic links."
-    return $false
-  } finally {
-    Remove-Item -Path $testLinkPath -ErrorAction SilentlyContinue
-    Remove-Item -Path $testTargetPath -ErrorAction SilentlyContinue
+  $null = New-Item -ItemType File -Path $testTargetPath -Force
+  $null = New-Item -ItemType SymbolicLink -Path $testLinkPath -Target $testTargetPath -Force -ErrorAction SilentlyContinue
+  # Check last error message to see if the symbolic link was created successfully
+  if ($Error) {
+    # There was an error, so check the error message. If the error message is "UnauthorizedAccess", the user does not have permissions to create symbolic links
+    $bRet = $false
+    # Any other error message is unexpected and should be investigated. The script will return $false also in this case.
+    # If the symbolic link was not created successfully, check the error message
+    foreach ($err in $Error) {
+      # Check the FullyQualifiedErrorId property if it contains the "UnauthorizedAccess" error
+      if ($DebugMsg) {
+        Write-Host -ForegroundColor DarkRed "- Error Message: $($err.Exception.Message)"
+        Write-Host -ForegroundColor DarkRed "- Category : $($err.CategoryInfo.Category)"
+        Write-Host -ForegroundColor DarkRed "- TargetName: $($err.CategoryInfo.TargetName)"
+        Write-Host -ForegroundColor DarkRed "- ScriptName: $($err.InvocationInfo.ScriptName)"
+        Write-Host -ForegroundColor DarkRed "- ErrorId: $($err.FullyQualifiedErrorId)"
+      } else {
+        if ($Verbose) { 
+          Write-Host -ForegroundColor DarkRed "- Error Message: $($err.Exception.Message)"
+          Write-Host -ForegroundColor DarkRed "- ErrorId: $($err.FullyQualifiedErrorId)" 
+        }
+      }
+      if ($err.FullyQualifiedErrorId -eq "UnauthorizedAccess" -or 
+        $err.FullyQualifiedErrorId -eq "NewItemSymbolicLinkElevationRequired,Microsoft.PowerShell.Commands.NewItemCommand") {
+          if ($Verbose) { Write-Host -ForegroundColor Red "- Symbolic link creation requires elevated privileges." ([Char]0x2717) }
+          Write-Host -ForegroundColor Red "- User $($env:USERNAME) has not permissions to create symbolic links with 'New-Item'." ([Char]0x2717) 
+        break
+      }
+    }
+  } else {
+    # There was no error, so the symbolic link was created successfully
+    if ($Verbose) { Write-Host -ForegroundColor Green "- TestSymbolic link created successfully." }
+    Write-Host -ForegroundColor Green "- User $($env:USERNAME) has permissions to create symbolic links with New-Item." ([Char]0x221A)
   }
+  # Clean up the test symbolic link and target
+  Remove-Item -Path $testLinkPath -ErrorAction SilentlyContinue
+  Remove-Item -Path $testTargetPath -ErrorAction SilentlyContinue
+  return $bRet
 }
 
 function OpenKNX_ShowLogo($AddCustomText= $null) {
@@ -130,12 +162,17 @@ function CheckForPrivileges {
         exit 1
       } else { Write-Host -ForegroundColor Green "- The script is running with Developer Mode." ([Char]0x221A) }
     }
-    if(-not $UseMklinkToCreateSymLinks -and $CHeckForSymbolicLinkPermissions) {
+    if(-not $Foce_Use_mklink_To_Create_SymLinks -and $CHeckForSymbolicLinkPermissions) {
       if($Verbose) { Write-Host -ForegroundColor Yellow "- Checking if we have permissions to create symbolic links" }
-      if( -not (Test-SymbolicLinkPermission) ) {   
-        Write-Host -ForegroundColor Red "ERROR: Restore-Dependencies requires permissions to create symbolic links to run!"
-        Write-Host -ForegroundColor Red "- Please run the script again with Administrator privileges."
-        exit 1
+      if( -not (Test-SymbolicLinkPermission) ) {
+        if($Auto_Use_mklink_To_Create_SymLinks) {
+          $Foce_Use_mklink_To_Create_SymLinks = $true
+          Write-Host -ForegroundColor Yellow "- We have no permissions to create symbolic links with 'New-Item'. We will try to use mklink to create symbolic links."
+        } else {
+          Write-Host -ForegroundColor Red "ERROR: Restore-Dependencies requires permissions to create symbolic links to run!"
+          Write-Host -ForegroundColor Red "- Please run the script again with Administrator privileges."
+          exit 1
+        }
       } else { Write-Host -ForegroundColor Green "- The script has permissions to create symbolic links." ([Char]0x221A) }
     } else { Write-Host -ForegroundColor Green "- We will use mklink to create symbolic links." ([Char]0x221A) }
   }
@@ -480,7 +517,7 @@ function CreateSymbolicLink ($projectDir, $projectFiles) {
         $linkTarget = Join-Path $(Join-Path ".." "..") $projectFile.BaseName.ToString()
 
         # Check if we are on Windows and if we should use mklink to create the symbolic link
-        if($IsWinEnv -and -not $UseMklinkToCreateSymLinks) {
+        if($IsWinEnv -and -not $Foce_Use_mklink_To_Create_SymLinks) {
           $LinkTarget = Join-Path $(Split-Path -Path $projectDir -Parent) $ProjectFile.BaseName
         }
         
@@ -525,7 +562,7 @@ function CreateSymbolicLink ($projectDir, $projectFiles) {
       
       # Check if we are on Windows and if we should use mklink command to create the symbolic link
       if($IsWinEnv) { 
-        if ( $UseMklinkToCreateSymLinks) {
+        if ( $Foce_Use_mklink_To_Create_SymLinks) {
          $CreateSymLinkCommand = "cmd /C mklink /D ""$($projectFile.Path)"" ""$($linkValue)"""
         } else {
           $TargetLinkDir = Split-Path -Path $projectDir -Parent
