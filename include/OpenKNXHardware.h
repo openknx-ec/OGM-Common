@@ -197,7 +197,7 @@
             #define INFO1_LED_PIN  25  // PiPico Onboard LED
             #define INFO1_LED_PIN_ACTIVE_ON HIGH
             #define INFO2_LED_PIN 3
-            #define INFO3_LED_PIN_ACTIVE_ON HIGH
+            #define INFO2_LED_PIN_ACTIVE_ON HIGH
             #define FUNC1_BUTTON_PIN 21 // Optional. It can be also used for the SAVE_INTERRUPT_PIN
             //#define SAVE_INTERRUPT_PIN 21 // Optional. It can be also used for the FUNC1_BUTTON_PIN
     #endif
