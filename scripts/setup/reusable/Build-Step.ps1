@@ -1,17 +1,19 @@
-# This script builds on release variant
-# call it with
-#    scripts/Build-Step.ps1 <pio-environment> <firmware-name> <binary-format>
+# This script builds the release variant of the firmware.
+# Call it with the following parameters:
+#    scripts/Build-Step.ps1 <pio-environment> <firmware-name> <binary-format> [<product-name>] <project-dir>
 # 
 # <pio-environment> is the env: entry from platformio.ini, which defines how to build the firmware. 
-#                   for [env:RP_2040] use "RP_2040" as <pio-environment>
-# <firmware-name>   is the name of the firmware file, which is created. Important, if there are
-#                   different firmwares for differen hardware build in one release
-#                   There should be always an "Upload-Firmware-<firmwarename>.ps1" script delivered,
+#                   For [env:RP_2040], use "RP_2040" as the <pio-environment>.
+# <firmware-name>   is the name of the firmware file that will be created. It is important to have
+#                   different firmware names for different hardware builds within the same release.
+#                   There should always be an "Upload-Firmware-<firmwarename>.ps1" script delivered,
 #                   which installs this firmware.
-# <binary-format>   currently just "uf2" for RP2040 and "bin" for SAMD
+# <binary-format>   currently supports "uf2" for RP2040 and "bin" for SAMD.
+# <product-name>    (optional) is the name of the product. If not provided, the firmware name without
+#                   the "firmware-" prefix will be used.
+# <project-dir>     is the directory path of the project.
 #
-# This file needs no changes and is project independent 
-
+# This file does not require any changes and is project-independent.
 
 param (
   [Parameter(Mandatory=$true)]
@@ -83,10 +85,16 @@ if (!$?) {
     exit 1
 }
 
-# Add entry to content.xml. If entry already exists, do nothing. If not, add it. If file does not exist, create it.
-$fileName = Join-Path $ProjectDir "release/data/content.xml"
-$XMLContent ="         <Product Name=""$productName"" Firmware=""$firmwareName.$binaryFormat"" Processor=""$processor"" />"
-$lineExists = Select-String -Path $fileName -Pattern $XMLContent -Quiet
-if (-not $lineExists) { Add-Content -Path $fileName -Value $XMLContent }
+$releaseTarget = Join-Path $ProjectDir "release/data/content.xml"
+#check if file exists content.xml exists if not create it
+if ((Test-Path -Path $releaseTarget -PathType Leaf)) {
+  # Add entry to content.xml. If entry already exists, do nothing. If not, add it. If file does not exist, create it.
+  $XMLContent ="         <Product Name=""$productName"" Firmware=""$firmwareName.$binaryFormat"" Processor=""$processor"" />"
+  $lineExists = Select-String -Path $fileName -Pattern $XMLContent -Quiet
+  if (-not $lineExists) { Add-Content -Path $releaseTarget -Value $XMLContent }
+} else {
+  Write-Host "ERROR - Buildstep: $releaseTarget could not be found!" -ForegroundColor Red
+  exit 1
+}
 
 exit 0

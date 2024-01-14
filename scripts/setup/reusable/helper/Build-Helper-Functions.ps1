@@ -1,3 +1,36 @@
+
+## Example usage
+#$inputString = 'target_oam = { oam=oam_logicmodule, Release=release_OKNXHW_REG1_BASE_V0, Firmware=firmware-OKNXHW_REG1_BASE_V0, Type="uf2"},
+#             { toam=oam_virtualbutton, Release="release_1TE_RP2040_SmartMF", Firmware="firmware-OKNXHW_REG1_BASE_V0", Type="uf2"}'
+#
+#$identifiers = @('Release', 'oam', 'Firmware', 'Type')
+#
+#$result = TargetBuildInformations -inputString $inputString -identifiers $identifiers
+function TargetBuildInformations {
+  param (
+      [string]$inputString,
+      [string[]]$identifiers
+  )
+  # Create an array to store objects
+  $objects = @()
+  # Loop through each line in the input string
+  foreach ($line in $inputString -split ',') {
+      # Create an object to store values
+      $object = New-Object PSObject
+      # Loop through each identifier and extract the corresponding values
+      foreach ($identifier in $identifiers) {
+          # Use a regular expression to match the identifier=value pattern
+          $matches = [regex]::Matches($line, "$identifier=([^,\s]+)")
+          # Extract the values and add them to the object
+          $object | Add-Member -MemberType NoteProperty -Name $identifier -Value $matches.Groups[1].Value
+      }
+      # Add the object to the array
+      $objects += $object
+  }
+  # Return the array of objects
+  return $objects
+}
+
 function ParseIniFile ($filePath) {
   $iniContent = Get-Content $filePath
   $parsedData = @{}
@@ -49,7 +82,7 @@ function Write-IniFileParams ($sectionKey, $section, $filePath, $Overwrite = $fa
         return
       }
   } else {
-      Write-Host "Section does not exists. Adding the new section." -ForegroundColor Yellow
+      Write-Host "Target does not exists. Adding the new Target: $($sectionKey)." -ForegroundColor Yellow
       # If the section does not exist, append it to the end of the file
       # Create the section header
       $iniContent = "`r`n$($sectionHeader) ; Automatic generated section"
@@ -73,12 +106,11 @@ function Write-IniFileParams ($sectionKey, $section, $filePath, $Overwrite = $fa
 function Copy-Sections($sourceIni, $targetIni, $parameter) {
   $sourceData = ParseIniFile $sourceIni
   $targetData = ParseIniFile $targetIni
+  $return = $null
 
   foreach ($sectionKey in $sourceData.Keys) {
     $section = $sourceData[$sectionKey]
     $supportedTargetOam = $section["target_oam"]
-
-   
     if ($supportedTargetOam) {
       $supportedTargetOamList = $supportedTargetOam -split ',\s*'
       if ($supportedTargetOamList -contains $parameter) {
@@ -88,6 +120,7 @@ function Copy-Sections($sourceIni, $targetIni, $parameter) {
         Write-Host "Processing device env: $($sectionKey) which does support: '$($parameter)'" -ForegroundColor Green
         Write-Host "Found matching device env: $($sectionKey)" -ForegroundColor Yellow
         Write-IniFileParams $sectionKey $section $targetIni
+        $return = $sectionKey -split ":" | Select-Object -Last 1
       } 
     } else {
       Write-Host "Processing device env: $($sectionKey) does not support target oam: '$($parameter)'" -ForegroundColor Gray
