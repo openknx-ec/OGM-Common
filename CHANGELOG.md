@@ -1,7 +1,11 @@
 # Changes
 
-## 2024-01-14
+## 1.1.0: 2024-01-09 -- 2024-01-14
+* Enhancment: Reusable scripts for compatibility with MacOS and Linux.
 * Fix: Sent heartbeat in configured format
+* Breaking changes: Remove the call addModule with pointer to prevent duplicate instances.
+* Feature: Adds new periodic & manual (by ko) save
+* Change: Adds a reserved memory area
 
 ## 1.0.12: 2024-01-03 -- 2024-01-08
 * ESP32 Platform: Call `setup1()` and `loop1()`
