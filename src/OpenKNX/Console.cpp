@@ -248,13 +248,9 @@ namespace OpenKNX
     {
         logBegin();
         openknx.logger.log("");
-#ifndef ARDUINO_ARCH_SAMD
-        openknx.logger.logOpenKnxHeader(80, "I n f o r m a t i o n s", ("(" + std::string(MAIN_OrderNumber) + ")").c_str(), "Showing generall system informations");
-#else
         openknx.logger.color(CONSOLE_HEADLINE_COLOR);
         openknx.logger.log("======================== Information ===========================================");
         openknx.logger.color(0);
-#endif
         openknx.logger.logWithPrefix("KNX Address", openknx.info.humanIndividualAddress().c_str());
         openknx.logger.logWithPrefixAndValues("Application (ETS)", "Number: %s  Version: %s  Configured: %i", openknx.info.humanApplicationNumber().c_str(), openknx.info.humanApplicationVersion().c_str(), knx.configured());
         openknx.logger.logWithPrefixAndValues("Firmware", "Number: %s  Version: %s  Name: %s", openknx.info.humanFirmwareNumber().c_str(), openknx.info.humanFirmwareVersion().c_str(), MAIN_OrderNumber);
@@ -288,11 +284,7 @@ namespace OpenKNX
         for (uint8_t i = 0; i < openknx.modules.count; i++)
             openknx.modules.list[i]->showInformations();
 
-#ifndef ARDUINO_ARCH_SAMD
-        openknx.logger.logSymbolSequence(80, '-', true);
-#else
         openknx.logger.log("--------------------------------------------------------------------------------");
-#endif
         openknx.logger.log("");
         logEnd();
     }
@@ -321,20 +313,12 @@ namespace OpenKNX
     {
         logBegin();
         openknx.logger.log("");
-    #ifndef ARDUINO_ARCH_SAMD
-        openknx.logger.logOpenKnxHeader(80, "F i l e s y s t e m", ("(" + std::string(MAIN_OrderNumber) + ")").c_str(), "List the content of the FileSystem");
-    #else
         openknx.logger.color(CONSOLE_HEADLINE_COLOR);
-        openknx.logger.log("======================== Filesystem ===========================================");
+        openknx.logger.log("======================== Filesystem ============================================");
 
         openknx.logger.color(0);
-    #endif
         showFilesystemDirectory("/");
-    #ifndef ARDUINO_ARCH_SAMD
-        openknx.logger.logSymbolSequence(80, '-', true);
-    #else
         openknx.logger.log("--------------------------------------------------------------------------------");
-    #endif
         logEnd();
     }
 
@@ -363,14 +347,10 @@ namespace OpenKNX
     {
         logBegin();
         openknx.logger.log("");
-#ifndef ARDUINO_ARCH_SAMD
-        openknx.logger.logOpenKnxHeader(80, "V e r s i o n s", ("(" + std::string(MAIN_OrderNumber) + ")").c_str(), "Show OpenKNX versions");
-#else
-        // ======================== Versions =============================================="
         openknx.logger.color(CONSOLE_HEADLINE_COLOR);
         openknx.logger.log("======================== Versions ==============================================");
         openknx.logger.color(0);
-#endif
+
         openknx.logger.logWithPrefix("This Firmware", openknx.info.humanFirmwareVersion(true));
         openknx.logger.logWithPrefix("KNX", KNX_Version);
         openknx.logger.logWithPrefix(openknx.common.logPrefix(), MODULE_Common_Version);
@@ -380,19 +360,10 @@ namespace OpenKNX
 
             openknx.logger.logWithPrefix(openknx.modules.list[i]->name().c_str(), openknx.modules.list[i]->version().c_str());
         }
-#ifndef ARDUINO_ARCH_SAMD
-        openknx.logger.logSymbolSequence(80, '-', true);
-#else
         openknx.logger.log("--------------------------------------------------------------------------------");
-#endif
         openknx.logger.logWithPrefix("Builddate", __DATE__);
         openknx.logger.logWithPrefix("Buildtime", __TIME__);
-#ifndef ARDUINO_ARCH_SAMD
-        openknx.logger.logSymbolSequence(80, '-', true);
-#else
         openknx.logger.log("--------------------------------------------------------------------------------");
-#endif
-
         logEnd();
     }
 
@@ -400,14 +371,9 @@ namespace OpenKNX
     {
         logBegin();
         openknx.logger.log("");
-#ifndef ARDUINO_ARCH_SAMD
-        openknx.logger.logOpenKnxHeader(80, "H  E  L  P", ("(" + std::string(MAIN_OrderNumber) + ")").c_str(), "CLI Commands for OpenKNX");
-#else
-        // ======================== Help =================================================="
         openknx.logger.color(CONSOLE_HEADLINE_COLOR);
         openknx.logger.log("======================== Help ==================================================");
         openknx.logger.color(0);
-#endif
         openknx.logger.log("Command(s)               Description");
         printHelpLine("help, h", "Show this help");
         printHelpLine("info, i", "Show general information");
@@ -440,22 +406,17 @@ namespace OpenKNX
         printHelpLine("bootloader", "Reset into Bootloader Mode");
 #endif
 #ifndef ARDUINO_ARCH_SAMD
-        printHelpLine("dw <pin> <value>", "DigitalWrite pin to value. i.e. dw 25 1");
-        printHelpLine("dr <pin>", "DigitalRead pin. i.e. dr 25. Returns 0 or 1");
-        printHelpLine("aw <pin> <value>", "AnalogWrite pin to value. i.e. aw 25 4095");
-        printHelpLine("ar <pin>", "AnalogRead pin. i.e. ar 25 returns value in range 0-4095");
-        printHelpLine("dwon <pin>", "DigitalWrite pin to HIGH. i.e. dwon 25");
-        printHelpLine("dwoff <pin>", "DigitalWrite pin to LOW. i.e. dwoff 25");
+        printHelpLine("dwon <pin>", "Write digital pin to HIGH");
+        printHelpLine("dwoff <pin>", "Write digital pin to LOW");
+        printHelpLine("dw <pin> 0-1", "Write digital pin");
+        printHelpLine("dr <pin>", "Read digial pin");
+        printHelpLine("aw <pin> 0-4096", "Write analog pin");
+        printHelpLine("ar <pin>", "Read analog pin");
 #endif
         for (uint8_t i = 0; i < openknx.modules.count; i++)
             openknx.modules.list[i]->showHelp();
 
-#ifndef ARDUINO_ARCH_SAMD
-        openknx.logger.logSymbolSequence(80, '-', true);
-#else
         openknx.logger.log("--------------------------------------------------------------------------------");
-#endif
-
         logEnd();
     }
 
@@ -622,42 +583,31 @@ namespace OpenKNX
     {
         if (auto _pos = cmd.find(' '); _pos != std::string::npos)
         {
-            uint8_t pin = std::stoi(cmd.substr(_pos + 1));
-            if (pin <= PINS_COUNT
-    #ifdef OKNXHW_REG2_PIPICO_W_V1
-                || pin <= PIN_LED // PIN_LED (32u) which is PIN_WL_GPIO0 (32u) is only available on PiPicoW
-    #endif
-            )
+            pin_size_t pin = std::stoi(cmd.substr(_pos + 1));
+            if (cmd.compare(0, 2, "dw") == 0 || cmd.compare(0, 2, "aw") == 0)
             {
-                if (cmd.compare(0, 2, "dw") == 0 || cmd.compare(0, 2, "aw") == 0)
+                if (auto __pos = cmd.find(' ', _pos + 1); __pos != std::string::npos)
                 {
-                    if (auto __pos = cmd.find(' ', _pos + 1); __pos != std::string::npos)
+                    int value = std::stoi(cmd.substr(__pos + 1));
+                    if (cmd.compare(0, 2, "dw") == 0 && value <= HIGH)
                     {
-                        int value = std::stoi(cmd.substr(__pos + 1));
-                        if (cmd.compare(0, 2, "dw") == 0 && value <= HIGH)
-                        {
-                            digitalWrite(pin, value);
-                            openknx.logger.logWithValues("(dw %i %i) Done!", pin, value);
-                        }
-                        else if (cmd.compare(0, 2, "aw") == 0 && value <= 4095)
-                        {
-                            analogWrite(pin, value);
-                            openknx.logger.logWithValues("(aw %i %i) Done!", pin, value);
-                        }
+                        digitalWrite(pin, value);
+                        openknx.logger.logWithPrefixAndValues("PinCommand", "Write pin %i to %i", pin, value);
+                    }
+                    else if (cmd.compare(0, 2, "aw") == 0 && value <= 4095)
+                    {
+                        analogWrite(pin, value);
+                        openknx.logger.logWithPrefixAndValues("PinCommand", "Write pin %i to %i", pin, value);
                     }
                 }
-                else if (cmd.compare(0, 2, "dr") == 0)
-                {
-                    openknx.logger.logWithValues("(dr %i) Value:%i", pin, digitalRead(pin));
-                }
-                else if (cmd.compare(0, 2, "ar") == 0)
-                {
-                    openknx.logger.logWithValues("(ar %i) Value:%i", pin, analogRead(pin));
-                }
             }
-            else
+            else if (cmd.compare(0, 2, "dr") == 0)
             {
-                openknx.logger.logWithValues("Pin %i not available!", pin);
+                openknx.logger.logWithPrefixAndValues("PinCommand", "Read pin %i: %i", pin, digitalRead(pin));
+            }
+            else if (cmd.compare(0, 2, "ar") == 0)
+            {
+                openknx.logger.logWithPrefixAndValues("PinCommand", "Read pin %i: %i", pin, analogRead(pin));
             }
         }
     }
