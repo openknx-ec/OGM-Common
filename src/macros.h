@@ -35,9 +35,11 @@
   #define UNUSED(x) ((void)(x)) // Use UNUSED(x) to avoid unused variable warnings. Example: UNUSED(x); --> x is not used
 #endif
 
+#ifndef ARDUINO_ARCH_ESP32
 // Macros to make a string from a macro
 #define STRINGIFY_(M) #M // Use STRINGIFY_(M) to convert a macro to a string. Example: STRINGIFY_(M) --> "M"
 #define STRINGIFY(M) STRINGIFY_(M)
+#endif
 
 #define A(CODE) " " CODE "\n\t" // Example: A("LDR R0, [R1]") --> " LDR R0, [R1]\n\t"
 #define L(CODE) CODE ":\n\t"  // Example: L("loop") --> "loop:\n\t"
