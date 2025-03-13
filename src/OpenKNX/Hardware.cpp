@@ -95,32 +95,92 @@ namespace OpenKNX
     void Hardware::initButtons()
     {
 #ifdef PROG_BUTTON_PIN
-        pinMode(PROG_BUTTON_PIN, INPUT_PULLUP);
+    #ifndef PROG_BUTTON_PIN_MODE
+        #define PROG_BUTTON_PIN_MODE INPUT_PULLUP
+    #endif
+
+    #ifndef PROG_BUTTON_PIN_INTERRUPT_ON
+        #define PROG_BUTTON_PIN_INTERRUPT_ON CHANGE
+    #endif
+
+    #if PROG_BUTTON_PIN_MODE == INPUT_PULLDOWN
+        #define PROG_BUTTON_PRESSED_ON HIGH
+    #else
+        #define PROG_BUTTON_PRESSED_ON LOW
+    #endif
+
+        pinMode(PROG_BUTTON_PIN, PROG_BUTTON_PIN_MODE);
         attachInterrupt(
             digitalPinToInterrupt(PROG_BUTTON_PIN),
-            []() -> void { openknx.progButton.change(!digitalRead(PROG_BUTTON_PIN)); }, CHANGE);
-#endif
+            []() -> void { openknx.progButton.change(digitalRead(PROG_BUTTON_PIN) == PROG_BUTTON_PRESSED_ON); },
+            PROG_BUTTON_PIN_INTERRUPT_ON);
+#endif // PROG_BUTTON_PIN
 
 #ifdef FUNC1_BUTTON_PIN
-        pinMode(FUNC1_BUTTON_PIN, INPUT_PULLUP);
+    #ifndef FUNC1_BUTTON_MODE
+        #define FUNC1_BUTTON_MODE INPUT_PULLUP
+    #endif
+
+    #ifndef FUNC1_BUTTON_PIN_INTERRUPT_ON
+        #define FUNC1_BUTTON_PIN_INTERRUPT_ON CHANGE
+    #endif
+
+    #if FUNC1_BUTTON_MODE == INPUT_PULLDOWN
+        #define FUNC1_BUTTON_PRESSED_ON HIGH
+    #else
+        #define FUNC1_BUTTON_PRESSED_ON LOW
+    #endif
+
+        pinMode(FUNC1_BUTTON_PIN, FUNC1_BUTTON_MODE);
         attachInterrupt(
             digitalPinToInterrupt(FUNC1_BUTTON_PIN),
-            []() -> void { openknx.func1Button.change(!digitalRead(FUNC1_BUTTON_PIN)); }, CHANGE);
-#endif
+            []() -> void { openknx.func1Button.change(digitalRead(FUNC1_BUTTON_PIN) == FUNC1_BUTTON_PRESSED_ON); },
+            FUNC1_BUTTON_PIN_INTERRUPT_ON);
+#endif // FUNC1_BUTTON_PIN
 
 #ifdef FUNC2_BUTTON_PIN
-        pinMode(FUNC2_BUTTON_PIN, INPUT_PULLUP);
+    #ifndef FUNC2_BUTTON_MODE
+        #define FUNC2_BUTTON_MODE INPUT_PULLUP
+    #endif
+
+    #ifndef FUNC2_BUTTON_PIN_INTERRUPT_ON
+        #define FUNC2_BUTTON_PIN_INTERRUPT_ON CHANGE
+    #endif
+
+    #if FUNC2_BUTTON_MODE == INPUT_PULLDOWN
+        #define FUNC2_BUTTON_PRESSED_ON HIGH
+    #else
+        #define FUNC2_BUTTON_PRESSED_ON LOW
+    #endif
+
+        pinMode(FUNC2_BUTTON_PIN, FUNC2_BUTTON_MODE);
         attachInterrupt(
             digitalPinToInterrupt(FUNC2_BUTTON_PIN),
-            []() -> void { openknx.func2Button.change(!digitalRead(FUNC2_BUTTON_PIN)); }, CHANGE);
-#endif
+            []() -> void { openknx.func2Button.change(digitalRead(FUNC2_BUTTON_PIN) == FUNC2_BUTTON_PRESSED_ON); },
+            FUNC2_BUTTON_PIN_INTERRUPT_ON);
+#endif // FUNC2_BUTTON_PIN
 
 #ifdef FUNC3_BUTTON_PIN
-        pinMode(FUNC3_BUTTON_PIN, INPUT_PULLUP);
+    #ifndef FUNC3_BUTTON_MODE
+        #define FUNC3_BUTTON_MODE INPUT_PULLUP
+    #endif
+
+    #ifndef FUNC3_BUTTON_PIN_INTERRUPT_ON
+        #define FUNC3_BUTTON_PIN_INTERRUPT_ON CHANGE
+    #endif
+
+    #if FUNC3_BUTTON_MODE == INPUT_PULLDOWN
+        #define FUNC3_BUTTON_PRESSED_ON HIGH
+    #else
+        #define FUNC3_BUTTON_PRESSED_ON LOW
+    #endif
+
+        pinMode(FUNC3_BUTTON_PIN, FUNC3_BUTTON_MODE);
         attachInterrupt(
             digitalPinToInterrupt(FUNC3_BUTTON_PIN),
-            []() -> void { openknx.func3Button.change(!digitalRead(FUNC3_BUTTON_PIN)); }, CHANGE);
-#endif
+            []() -> void { openknx.func3Button.change(digitalRead(FUNC3_BUTTON_PIN) == FUNC3_BUTTON_PRESSED_ON); },
+            FUNC3_BUTTON_PIN_INTERRUPT_ON);
+#endif // FUNC3_BUTTON_PIN
     }
 
     void Hardware::initKnxRxISR()
