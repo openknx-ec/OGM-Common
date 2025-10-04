@@ -168,12 +168,6 @@ openknx.gpio.digitalWrite(0x0105, HIGH); // Write HIGH to IO 5 on expander 1
 openknx.gpio.digitalRead(0x0105);        // Read IO 5 on expander 1
 
 openknx.gpio.pinMode(0x0202, INPUT_PULLUP); // Set IO 2 on expander 2 (addressed as 0x02) to INPUT_PULLUP
-
-openknx.gpio.attachInterrupt(
-    0x0202,
-    [this](openknx_gpio_number_t pin, bool state) -> void { openknx.func1Button.change(!state); },
-    CHANGE
-);
 ```
 
 ### Supported Hardware
